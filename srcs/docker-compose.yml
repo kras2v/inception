@@ -1,0 +1,66 @@
+version: '3'
+
+services:
+    mariadb:
+        build:
+            context: ./requirements/mariadb
+            dockerfile: Dockerfile
+        container_name: mariadb
+        restart: unless-stopped
+        env_file: .env
+        environment:
+           - MARIADB_DATABASE=wordpress
+           - MARIADB_ROOT_PASSWORD_FILE=/run/secrets/db_root_password
+           - MARIADB_PASSWORD_FILE=/run/secrets/db_password
+        volumes:
+           - /home/vboxuser/data/mariadb:/data/mariadb
+        networks:
+           - inception
+        secrets:
+           - db_root_password
+           - db_password
+
+    wordpress:
+         depends_on:
+           - mariadb
+         build:
+            context: ./requirements/wordpress
+            dockerfile: Dockerfile
+         container_name: wordpress
+         restart: unless-stopped
+         env_file: .env
+         environment:
+           - WORDPRESS_DB_HOST=mariadb:3306
+           - WORDPRESS_DB_USER=$MARIADB_USER
+           - WORDPRESS_DB_PASSWORD=$MARIADB_PASSWORD
+           - WORDPRESS_DB_NAME=wordpress
+         volumes:
+           - /home/vboxuser/data/wordpress:/data/wordpress
+         networks:
+           - inception
+
+    nginx:
+         depends_on:
+           - wordpress
+         build:
+            context: ./requirements/nginx
+            dockerfile: Dockerfile
+         #image: nginx:custom
+         container_name: nginx
+         restart: unless-stopped
+         ports:
+           - "443:443"
+         volumes:
+           - /home/vboxuser/data/wordpress:/data/wordpress
+         networks:
+           - inception
+
+networks:
+    inception:
+          driver: bridge
+
+secrets:
+    db_root_password:
+          file: ../secrets/db_root_password.txt
+    db_password:
+          file: ../secrets/db_password.txt
