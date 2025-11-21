@@ -13,7 +13,7 @@ services:
            - MARIADB_ROOT_PASSWORD_FILE=/run/secrets/db_root_password
            - MARIADB_PASSWORD_FILE=/run/secrets/db_password
         volumes:
-           - /home/vboxuser/data/mariadb:/data/mariadb
+           - /home/vboxuser/data/mariadb:/var/lib/mysql
         networks:
            - inception
         secrets:
@@ -30,14 +30,16 @@ services:
          restart: unless-stopped
          env_file: .env
          environment:
-           - WORDPRESS_DB_HOST=mariadb:3306
+           - WORDPRESS_DB_HOST=mariadb
            - WORDPRESS_DB_USER=$MARIADB_USER
-           - WORDPRESS_DB_PASSWORD=$MARIADB_PASSWORD
+           - WORDPRESS_DB_PASSWORD_FILE=/run/secrets/db_password
            - WORDPRESS_DB_NAME=wordpress
          volumes:
-           - /home/vboxuser/data/wordpress:/data/wordpress
+           - /home/vboxuser/data/wordpress:/var/www
          networks:
            - inception
+         secrets:
+           - db_password
 
     nginx:
          depends_on:
@@ -51,7 +53,7 @@ services:
          ports:
            - "443:443"
          volumes:
-           - /home/vboxuser/data/wordpress:/data/wordpress
+           - /home/vboxuser/data/wordpress:/var/www
          networks:
            - inception
 

@@ -2,7 +2,7 @@
 set -e
 echo "Mariadb entrypoint started"
 
-DATA_DIR=/data/mariadb
+DATA_DIR=/var/lib/mysql
 
 sql_escape_string_literal() {
 	local newline=$'\n'
@@ -13,22 +13,30 @@ sql_escape_string_literal() {
 
 setup_db() {
 	local SQL=""
+	
+	if [ -n "$MARIADB_ROOT_PASSWORD_FILE" ]; then
+	  	local MARIADB_ROOT_PASSWORD=$(cat "$MARIADB_ROOT_PASSWORD_FILE")
+	fi
 
 	if [ -n "$MARIADB_ROOT_PASSWORD" ]; then
-		local rootPasswordEscaped=$(docker_sql_escape_string_literal "${MARIADB_ROOT_PASSWORD}")
-		SQL+="ALTER USER 'root'@'localhost' IDENTIFIED BY '${rootPasswordEscaped}';"$'\n'
+		local rootPasswordEscaped=$(sql_escape_string_literal "${MARIADB_ROOT_PASSWORD}")
+		SQL="$SQL ALTER USER 'root'@'localhost' IDENTIFIED BY '${rootPasswordEscaped}';"$'\n'
 	fi
 	
 	if [ -n "$MARIADB_DATABASE" ]; then
-		SQL+="CREATE DATABASE IF NOT EXISTS \`$MARIADB_DATABASE\`;"$'\n'
+		SQL="$SQL CREATE DATABASE IF NOT EXISTS \`$MARIADB_DATABASE\`;"$'\n'
+	fi
+	
+	if [ -n "$MARIADB_PASSWORD_FILE" ]; then
+	 	local MARIADB_PASSWORD=$(cat "$MARIADB_PASSWORD_FILE")
 	fi
 
 	if  [ -n "$MARIADB_PASSWORD" ] && [ -n "$MARIADB_USER" ]; then
-		local userPasswordEscaped=$(docker_sql_escape_string_literal "${MARIADB_PASSWORD}")
-		SQL+="CREATE USER '$MARIADB_USER'@'%' IDENTIFIED BY '$userPasswordEscaped';"$'\n'
+		local userPasswordEscaped=$(sql_escape_string_literal "${MARIADB_PASSWORD}")
+		SQL="$SQL CREATE USER '$MARIADB_USER'@'%' IDENTIFIED BY '$userPasswordEscaped';"$'\n'
 		if [ -n "$MARIADB_DATABASE" ]; then
-			SQL+="GRANT ALL ON \`${MARIADB_DATABASE//_/\\_}\`.* TO '$MARIADB_USER'@'%';"$'\n'
-			SQL+="FLUSH PRIVILEGES;"$'\n'
+			SQL="$SQL GRANT ALL ON \`${MARIADB_DATABASE//_/\\_}\`.* TO '$MARIADB_USER'@'%';"$'\n'
+			SQL="$SQL FLUSH PRIVILEGES;"$'\n'
 		fi
 	fi
 
@@ -44,16 +52,15 @@ setup_db() {
 		kill "$MARIADB_PID"
         	wait "$MARIADB_PID"
 	fi
-	
-}
 
-echo "UID ->> " | id -u mysql | cat 
+	echo $SQL
+}
 
 if [ ! -d "$DATA_DIR/mysql" ]; then
   echo "Data directory is empty. Running initial setup..."  
   chown -R mysql:mysql $DATA_DIR
   mariadb-install-db --user=mysql --basedir=/usr --datadir="$DATA_DIR"
-  docker_setup_db
+  setup_db
 fi
 
 exec gosu mysql "$@"

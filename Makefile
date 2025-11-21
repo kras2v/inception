@@ -3,12 +3,6 @@ all:
 	  docker-ce docker-compose \
 	  mariadb-client
 	  
-	sudo mkdir -p ~/data/wordpress
-	sudo mkdir -p ~/data/mariadb
-	
-	sudo chown -R www-data:www-data ~/data/wordpress
-	sudo chown -R mysql:mysql ~/data/mariadb
-	
 up: 
 	sudo docker-compose -f ./srcs/docker-compose.yml up --build -d
 	
