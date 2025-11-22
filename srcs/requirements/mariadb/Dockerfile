@@ -5,7 +5,7 @@ RUN apk update && apk add  mariadb mariadb-client gosu
 RUN mkdir -p /run/mysqld && \
     chown -R mysql:mysql /run/mysqld
 
-COPY ./conf/my.cnf /etc/mysql/my.cnf
+COPY ./conf/custom-mariadb-server.cnf /etc/my.cnf.d/mariadb-server.cnf
 
 COPY ./conf/docker-entrypoint.sh /usr/local/bin/
 

@@ -13,7 +13,7 @@ services:
            - MARIADB_ROOT_PASSWORD_FILE=/run/secrets/db_root_password
            - MARIADB_PASSWORD_FILE=/run/secrets/db_password
         volumes:
-           - /home/vboxuser/data/mariadb:/var/lib/mysql
+           - $SUDO_HOME/data/mariadb:/var/lib/mysql
         networks:
            - inception
         secrets:
@@ -35,7 +35,7 @@ services:
            - WORDPRESS_DB_PASSWORD_FILE=/run/secrets/db_password
            - WORDPRESS_DB_NAME=wordpress
          volumes:
-           - /home/vboxuser/data/wordpress:/var/www
+           - $SUDO_HOME/data/wordpress:/var/www/html
          networks:
            - inception
          secrets:
@@ -53,7 +53,7 @@ services:
          ports:
            - "443:443"
          volumes:
-           - /home/vboxuser/data/wordpress:/var/www
+           - $SUDO_HOME/data/wordpress:/var/www/html
          networks:
            - inception
 
