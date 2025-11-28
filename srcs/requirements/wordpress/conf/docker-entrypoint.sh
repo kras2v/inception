@@ -9,18 +9,7 @@ CACHE_DIR=/home/www-data/.wp-cli/cache
 install_wp() {
 	mkdir -p "$DATA_DIR"
 	cd "$DATA_DIR"
-	echo "1"
-	if ! id "www-data" >/dev/null 2>&1; then
-		
-	   	if ! getent group www-data >/dev/null 2>&1; then
-		    addgroup -g 82 www-data
-		    echo "Group www-data created with GID 82"
-		else
-		    echo "Group www-data already exists"
-		fi
-		adduser -D -H -u 82 -G www-data -s /bin/nologin www-data
-	fi
-	
+
 	chown -R www-data:www-data "$DATA_DIR"
 	
 	mkdir -p "$CACHE_DIR"
@@ -31,9 +20,10 @@ install_wp() {
 	    local WORDPRESS_DB_PASSWORD=$(cat "$WORDPRESS_DB_PASSWORD_FILE")
 	fi
 	
-	echo "3"
 	gosu www-data wp core download
 	
+	mv /tmp/myresume.html .
+
 	echo "Connecting to MariaDB at $WORDPRESS_DB_HOST:3306 as $WORDPRESS_DB_USER"
 	export MYSQL_PWD="$WORDPRESS_DB_PASSWORD"
 

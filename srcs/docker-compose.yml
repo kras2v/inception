@@ -5,6 +5,7 @@ services:
         build:
             context: ./requirements/mariadb
             dockerfile: Dockerfile
+        image: mariadb
         container_name: mariadb
         restart: unless-stopped
         env_file: .env
@@ -26,6 +27,7 @@ services:
          build:
             context: ./requirements/wordpress
             dockerfile: Dockerfile
+         image: wordpress
          container_name: wordpress
          restart: unless-stopped
          env_file: .env
@@ -47,8 +49,11 @@ services:
          build:
             context: ./requirements/nginx
             dockerfile: Dockerfile
-         #image: nginx:custom
+         image: nginx
          container_name: nginx
+         env_file: .env
+         environment:
+           - WORDPRESS_DB_HOST=wordpress
          restart: unless-stopped
          ports:
            - "443:443"
