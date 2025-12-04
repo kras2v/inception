@@ -9,7 +9,7 @@ COPY ./tools/myresume.html /tmp/myresume.html
 COPY ./conf/docker-entrypoint.sh /usr/local/bin/
 
 RUN echo "memory_limit = 512M" >> /etc/php83/php.ini
-RUN adduser -D -H -u 82 -G www-data -s /bin/nologin www-data
+#RUN adduser -D -H -u 82 -G www-data -s /bin/nologin www-data
 
 ENTRYPOINT ["docker-entrypoint.sh"]
 

@@ -1,6 +1,6 @@
 FROM alpine:3.22.2
 
-RUN apk update && apk add nginx nano openssl envsubst
+RUN apk update && apk add nginx openssl envsubst
 
 COPY ./conf/docker-entrypoint.sh /usr/local/bin/
 

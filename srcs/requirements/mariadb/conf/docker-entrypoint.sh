@@ -63,4 +63,4 @@ if [ ! -d "$DATA_DIR/mysql" ]; then
   setup_db
 fi
 
-exec gosu mysql "$@"
+exec gosu mysql "$@" 
