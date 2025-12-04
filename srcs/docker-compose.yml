@@ -14,7 +14,7 @@ services:
            - MARIADB_ROOT_PASSWORD_FILE=/run/secrets/db_root_password
            - MARIADB_PASSWORD_FILE=/run/secrets/db_password
         volumes:
-           - $SUDO_HOME/data/mariadb:/var/lib/mysql
+           - $SUDO_HOME/data/mariadb:/var/lib/mysql/wordpress
         networks:
            - inception
         secrets:
